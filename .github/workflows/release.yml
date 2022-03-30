@@ -1,5 +1,6 @@
 name: Create new release from release branch
 
+# This action will only run when a pull request is closed/merged.
 on:
   pull_request:
     types:
@@ -7,7 +8,27 @@ on:
 
 jobs:
   create-release:
-    if:  startsWith(github.head_ref, 'releases/') && github.event.pull_request.merged == true
+    # Action will be skipped unless we have a successful merge AND the original PR started with release
+    # If this condition isn't matched, then github will show the action as skipped. 
+    if:  startsWith(github.head_ref, 'release') && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - run: echo "A release branch has been merged with trunk, time to create a new release"
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          # We checkout from trunk so we're acting on post-merge state rather than pre-merge.
+          ref: 'trunk'
+      - name: Get Version
+        id: version
+        run: echo ::set-output name=data::$(date "+%s")
+      - name: Get Changelog
+        id: changelog
+          # this is just a test to validate multiline output
+        run: echo ::set-output name=data::$(ls -l)
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{steps.version.outputs.data}}
+          name: "Version ${{steps.version.outputs.data}}"
+          body: ${{steps.changelog.data}}
