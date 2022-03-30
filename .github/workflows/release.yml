@@ -2,21 +2,13 @@ name: Create new release from release branch
 
 on:
   pull_request:
+   branches: 
+      - 'release**'
     types:
       - closed
 jobs:
-  is-release:
-    if:  startsWith(github.head_ref, 'release')
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "triggered because this is a release branch"
-  is-merge:
-    if:  github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "this PR has been merged"
   create-release:
-    if:  startsWith(github.head_ref, 'releases/') && github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - run: echo "A release branch has been merged with trunk, time to create a new release"
