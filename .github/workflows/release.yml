@@ -17,8 +17,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          # We checkout from trunk so we're acting on post-merge state rather than pre-merge.
-          ref: 'trunk'
+          # We checkout based on the merge_commit_sha trunk so we're acting on post-merge state rather than pre-merge.
+          ref: ${{github.event.pull_request.merge_commit_sha}}
       - name: Get Version
         id: version
         run: echo ::set-output name=data::$(date "+%s")
@@ -26,9 +26,18 @@ jobs:
         id: changelog
           # this is just a test to validate multiline output
         run: echo ::set-output name=data::$(ls -l)
+
+        # The following are just for debugging purposes
+      - name: Echo version
+        run: echo {{steps.version.outputs.data}}
+      - name: Echo changelog 
+        run: echo {{steps.changelog.data}}
+        
+        
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v0.1.14
         with:
           tag_name: ${{steps.version.outputs.data}}
           name: "Version ${{steps.version.outputs.data}}"
           body: ${{steps.changelog.data}}
+          target_commitish: ${{github.event.pull_request.merge_commit_sha}}
