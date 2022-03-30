@@ -2,15 +2,10 @@ name: Create new release from release branch
 
 on:
   pull_request:
-    branches: 
-      - 'trunk'
+    types:
+      - closed
 
 jobs:
-  is-merge:
-    if:  github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "this PR has been merged"
   create-release:
     if:  startsWith(github.head_ref, 'releases/') && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
