@@ -2,7 +2,7 @@ name: Create new release from release branch
 
 on:
   pull_request:
-   branches: 
+    branches: 
       - 'release**'
     types:
       - closed
