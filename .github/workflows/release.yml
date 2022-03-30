@@ -6,6 +6,7 @@ on:
       - 'release**'
     types:
       - closed
+
 jobs:
   create-release:
     if: github.event.pull_request.merged == true
