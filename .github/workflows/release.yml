@@ -4,12 +4,15 @@ on:
   pull_request:
     branches: 
       - 'release**'
-    types:
-      - closed
 
 jobs:
+  is-merge:
+    if:  github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "this PR has been merged"
   create-release:
-    if: github.event.pull_request.merged == true
+    if:  startsWith(github.head_ref, 'releases/') && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - run: echo "A release branch has been merged with trunk, time to create a new release"
