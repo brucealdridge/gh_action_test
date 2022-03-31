@@ -14,31 +14,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "A release branch has been merged with trunk, time to create a new release"
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          # We checkout based on the merge_commit_sha trunk so we're acting on post-merge state rather than pre-merge.
-          ref: ${{github.event.pull_request.merge_commit_sha}}
       - name: Get Version
         id: version
         run: echo ::set-output name=data::$(date "+%s")
       - name: Get Changelog
         id: changelog
-          # multiline strings aren't supported well in github actions. The first line below is to 
-          # save the changelog into a local variable, the other lines are post-processing required
-          # for saving this. see https://medium.com/agorapulse-stories/how-to-work-with-multiline-string-variables-in-github-actions-23f56447d209
+          # Multiline strings aren't supported well in github actions. 
+          # We need to use tokens use a delimiter to handle this.
+          #  see https://github.community/t/set-output-truncates-multiline-strings/16852/14
         run: |
-          export CHANGELOG="$(ls -l)"
-          CHANGELOG="${CHANGELOG//'%'/'%25'}"
-          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
-          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
-          echo "::set-output name=data::$(echo "$CHANGELOG")"
+          echo 'CHANGELOG<<EOF' >> $GITHUB_ENV
+          curl https://httpbin.org/json >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
         # The following are just for debugging purposes
       - name: Echo version
         run: echo ${{steps.version.outputs.data}}
       - name: Echo changelog 
-        run: echo ${{steps.changelog.data}}
+        run: echo $JSON_RESPONSE
         
         
       - name: Release
@@ -46,5 +39,5 @@ jobs:
         with:
           tag_name: ${{steps.version.outputs.data}}
           name: "Version ${{steps.version.outputs.data}}"
-          body: ${{steps.changelog.data}}
+          body: ${{env.CHANGELOG}}
           target_commitish: ${{github.event.pull_request.merge_commit_sha}}
