@@ -31,7 +31,7 @@ jobs:
       - name: Echo version
         run: echo ${{steps.version.outputs.data}}
       - name: Echo changelog 
-        run: echo $JSON_RESPONSE
+        run: echo $CHANGELOG
         
         
       - name: Release
