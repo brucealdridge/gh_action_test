@@ -24,8 +24,15 @@ jobs:
         run: echo ::set-output name=data::$(date "+%s")
       - name: Get Changelog
         id: changelog
-          # this is just a test to validate multiline output
-        run: echo ::set-output name=data::$(ls -l)
+          # multiline strings aren't supported well in github actions. The first line below is to 
+          # save the changelog into a local variable, the other lines are post-processing required
+          # for saving this. see https://medium.com/agorapulse-stories/how-to-work-with-multiline-string-variables-in-github-actions-23f56447d209
+        run: |
+          export CHANGELOG="$(ls -l)"
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+          echo "::set-output name=data::$(echo "$CHANGELOG")"
 
         # The following are just for debugging purposes
       - name: Echo version
