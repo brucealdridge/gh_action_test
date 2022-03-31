@@ -1,3 +1,3 @@
 Testing of github actions
 
-v1.4
+v1.5
