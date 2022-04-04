@@ -14,28 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "A release branch has been merged with trunk, time to create a new release"
-      - name: Get Version
-        id: version
-        run: echo ::set-output name=data::$(date "+%s")
-      - name: Get Changelog
-        id: changelog
-          # Multiline strings aren't supported well in github actions. 
-          # We need to use tokens use a delimiter to handle this.
-          #  see https://github.community/t/set-output-truncates-multiline-strings/16852/14
-        run: |
-          echo 'CHANGELOG<<EOF' >> $GITHUB_ENV
-          curl https://httpbin.org/json >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-
 
       - name: Checkout
         uses: actions/checkout@v3
         with:
           # We checkout based on the merge_commit_sha trunk so we're acting on post-merge state rather than pre-merge. This is required to grab the version from package.json
           ref: ${{github.event.pull_request.merge_commit_sha}}
-      - name: packageversion
-        id: packageversion
-        run: echo ::set-output name=v::$(jq '.version' package.json -r)
+      - name: version
+        id: version
+        run: echo ::set-output name=data::$(jq '.version' package.json -r)
 
 
         # The following are just for debugging purposes
@@ -43,12 +30,6 @@ jobs:
         run: echo ${{steps.version.outputs.data}}
 
 
-      - name: Echo package version
-        run: echo ${{steps.packageversion.outputs.v}}
-
-      - name: Echo changelog 
-        run: echo $CHANGELOG
-        
         
       - name: Release
         uses: softprops/action-gh-release@v0.1.14
