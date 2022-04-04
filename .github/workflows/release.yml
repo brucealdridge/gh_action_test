@@ -3,10 +3,18 @@ name: Automatically tag new release when release PR is merged
 # This action will only run when a pull request is closed/merged.
 on:
   pull_request:
-    branches:    
+    types:
+      - opened
+      - closed
+    branches:
       - 'release**'
 
 jobs:
+  debug-me:
+    runs-on: ubuntu-latest
+    steps:
+      - name: this should always run
+      - run: echo "I'm running"
   comment-on-open:
     if: github.event.action == 'opened'
     runs-on: ubuntu-latest
