@@ -1,16 +1,29 @@
-name: Create new release from release branch
+name: Automatically tag new release when release PR is merged
 
 # This action will only run when a pull request is closed/merged.
 on:
   pull_request:
-    types:
-      - closed
+    branches:    
+      - 'release**'
 
 jobs:
+  comment-on-open:
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Add comment
+        uses: peter-evans/create-or-update-comment@a35cf36e5301d70b76f316e867e7788a55a31dae
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            :warning: This PR will create and tag a release automatically when merged. :robot:
+
   create-release:
     # Action will be skipped unless we have a successful merge AND the original PR started with release
     # If this condition isn't matched, then github will show the action as skipped. 
-    if:  startsWith(github.head_ref, 'release') && github.event.pull_request.merged == true
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - run: echo "A release branch has been merged with trunk, time to create a new release"
@@ -25,12 +38,6 @@ jobs:
         run: echo ::set-output name=data::$(jq '.version' package.json -r)
 
 
-        # The following are just for debugging purposes
-      - name: Echo version
-        run: echo ${{steps.version.outputs.data}}
-
-
-        
       - name: Release
         uses: softprops/action-gh-release@v0.1.14
         with:
