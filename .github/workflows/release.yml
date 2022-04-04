@@ -6,18 +6,11 @@ on:
     types:
       - opened
       - closed
-    branches:
-      - 'release**'
 
 jobs:
-  debug-me:
-    runs-on: ubuntu-latest
-    steps:
-      - name: this should always run
-        run: echo "I'm running"
-
   comment-on-open:
-    if: github.event.action == 'opened'
+    if: github.event.action == 'opened' && startsWith(github.head_ref, 'release')
+
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -32,7 +25,7 @@ jobs:
   create-release:
     # Action will be skipped unless we have a successful merge AND the original PR started with release
     # If this condition isn't matched, then github will show the action as skipped. 
-    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'release')
     runs-on: ubuntu-latest
     steps:
       - run: echo "A release branch has been merged with trunk, time to create a new release"
