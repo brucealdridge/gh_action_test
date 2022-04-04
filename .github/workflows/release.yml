@@ -27,12 +27,22 @@ jobs:
           curl https://httpbin.org/json >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
-        # The following are just for debugging purposes
-      - name: Echo version
-        run: echo ${{steps.version.outputs.data}}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          # We checkout based on the merge_commit_sha trunk so we're acting on post-merge state rather than pre-merge. This is required to grab the version from package.json
+          ref: ${{github.event.pull_request.merge_commit_sha}}
       - name: packageversion
         id: packageversion
         run: echo ::set-output name=v::$(jq '.version' package.json -r)
+
+
+        # The following are just for debugging purposes
+      - name: Echo version
+        run: echo ${{steps.version.outputs.data}}
+
+
       - name: Echo package version
         run: echo ${{steps.packageversion.outputs.v}}
 
