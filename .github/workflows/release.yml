@@ -14,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: this should always run
-      - run: echo "I'm running"
+        run: echo "I'm running"
+
   comment-on-open:
     if: github.event.action == 'opened'
     runs-on: ubuntu-latest
