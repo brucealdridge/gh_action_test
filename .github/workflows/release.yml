@@ -2,30 +2,18 @@ name: Automatically tag new release when release PR is merged
 
 # This action will only run when a pull request is closed/merged.
 on:
-  pull_request:
+  pull_request_target:
+    branches:
+      - 'release**'
     types:
       - opened
       - closed
 
 jobs:
-  comment-on-open:
-    if: github.event.action == 'opened' && startsWith(github.head_ref, 'release')
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-    steps:
-      - name: Add comment
-        uses: peter-evans/create-or-update-comment@a35cf36e5301d70b76f316e867e7788a55a31dae
-        with:
-          token: ${{ secrets.GHA_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            :warning: This PR will create and tag a release automatically when merged. :robot:
-
   create-release:
     # Action will be skipped unless we have a successful merge AND the original PR started with release
     # If this condition isn't matched, then github will show the action as skipped. 
-    if: github.event.action == 'closed' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'release')
+    if:  startsWith(github.event.pull_request.base.ref, 'trunk') && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - run: echo "A release branch has been merged with trunk, time to create a new release"
