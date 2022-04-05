@@ -4,16 +4,15 @@ name: Automatically tag new release when release PR is merged
 on:
   pull_request_target:
     branches:
-      - 'release**'
+      - 'trunk'
     types:
-      - opened
       - closed
 
 jobs:
   create-release:
     # Action will be skipped unless we have a successful merge AND the original PR started with release
     # If this condition isn't matched, then github will show the action as skipped. 
-    if:  startsWith(github.event.pull_request.base.ref, 'trunk') && github.event.pull_request.merged == true
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'release')
     runs-on: ubuntu-latest
     steps:
       - run: echo "A release branch has been merged with trunk, time to create a new release"
